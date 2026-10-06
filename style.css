@@ -235,3 +235,73 @@ aside h5{font-size:9px;letter-spacing:.06em;margin:12px 2px 5px}.card{border:1px
  left:3px!important;right:3px!important;top:14px!important;
  width:auto!important;height:4px!important;background:#f7f2e7!important;border-radius:0!important;
 }
+
+/* v14 – corrected selectors after inspecting actual markup */
+.scale{display:none!important}
+
+/* Right sidebar cards */
+.addgrid .add{
+ height:126px!important;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:center!important;
+ justify-content:center!important;
+ gap:4px!important;
+ padding:8px!important;
+ text-align:center!important;
+ overflow:hidden!important;
+}
+.addgrid .add b{align-self:auto!important;margin:0!important;font-size:16px!important;line-height:20px!important}
+.addgrid .add small{margin:0!important;line-height:18px!important}
+
+/* Jump illustrations */
+.addgrid .jumpicon{
+ width:98px!important;height:42px!important;
+ margin:0 auto 3px!important;
+ flex:none!important;
+ border-left:6px solid #8b8f89!important;
+ border-right:6px solid #8b8f89!important;
+ background:none!important;
+ transform:none!important;
+ display:flex!important;
+ flex-direction:column!important;
+ justify-content:space-around!important;
+ padding:3px 0!important;
+ filter:drop-shadow(2px 3px 1px rgba(0,0,0,.3))!important;
+}
+.addgrid .jumpicon i{
+ display:block!important;height:5px!important;width:100%!important;border-radius:1px!important;
+}
+/* Räcke blue/white */
+.addgrid .railicon i{
+ background:repeating-linear-gradient(90deg,#1680c5 0 15%,#f7f4ec 15% 30%)!important;
+}
+/* Oxer red/white */
+.addgrid .oxericon i{
+ background:repeating-linear-gradient(90deg,#c83b34 0 15%,#f7f4ec 15% 30%)!important;
+}
+
+/* Ground pole green/white */
+.addgrid .poleicon{
+ width:104px!important;height:7px!important;flex:none!important;
+ margin:15px auto 14px!important;
+ background:repeating-linear-gradient(90deg,#17624b 0 16%,#f7f4ec 16% 32%)!important;
+ border:1px solid #4b514b!important;border-radius:4px!important;
+ box-shadow:2px 3px 2px rgba(0,0,0,.28)!important;
+ transform:none!important;
+}
+
+/* Cone: same visual language as arena cone */
+.addgrid .coneicon{
+ position:relative!important;width:25px!important;height:36px!important;flex:none!important;
+ margin:2px auto 4px!important;font-size:0!important;
+ background:linear-gradient(90deg,#d75c15,#ff963d 50%,#d75c15)!important;
+ clip-path:polygon(38% 0,62% 0,80% 75%,100% 80%,100% 100%,0 100%,0 80%,20% 75%)!important;
+ filter:drop-shadow(3px 5px 2px rgba(0,0,0,.35))!important;
+}
+.addgrid .coneicon:before{display:none!important}
+.addgrid .coneicon:after{
+ display:block!important;content:"";position:absolute!important;
+ left:3px!important;right:3px!important;top:14px!important;bottom:auto!important;
+ width:auto!important;height:4px!important;background:#f7f2e7!important;border-radius:0!important;
+}
