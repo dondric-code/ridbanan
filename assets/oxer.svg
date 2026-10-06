@@ -2,4 +2,4 @@
 <defs><filter id="s"><feDropShadow dx="7" dy="9" stdDeviation="5" flood-opacity=".35"/></filter></defs>
 <g filter="url(#s)"><path fill="#aaa" d="M24 99h45v10H24zm207 0h45v10h-45z"/><path fill="#eee" d="M45 10h18v94H45zm192 0h18v94h-18z"/>
 <g stroke-width="12" stroke-linecap="round"><path stroke="#f4f1e8" d="M57 31h186M57 57h186M57 83h186"/>
-<path stroke="#1680c5" stroke-dasharray="30 30" d="M57 31h186M57 57h186M57 83h186"/></g></g></svg>
+<path stroke="#cf3933" stroke-dasharray="30 30" d="M57 31h186M57 57h186M57 83h186"/></g></g></svg>
