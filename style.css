@@ -62,43 +62,30 @@ aside h5{font-size:9px;letter-spacing:.06em;margin:12px 2px 5px}.card{border:1px
 }
 .viewtools button:not(.active){background:#fff!important;border-color:#dfe4e0!important;color:#343a36!important}
 
-/* v7: close visual match to the generated reference, based on v5 */
-:root{--refblue:#1688df;--hair:#d9dee2}
-body{background:#f6f7f7}
-.appbar{height:82px;background:rgba(255,255,255,.97);border-bottom:1px solid #dfe2e4;box-shadow:0 1px 4px #0000000c}
-.workspace{top:82px}
-.brand{font-size:28px;font-weight:750;letter-spacing:-1px}
-.tool,.viewtools button,.filetools button{border-radius:8px;border-color:#e0e3e5;background:#fff}
-.tool.active,.viewtools button.active{background:#d7ebff!important;color:#087bd0!important;border-color:#c5e2fb!important}
-#viewport{padding:22px 26px;background:
- linear-gradient(#456f2a22,#456f2a22),url("grass_ref.jpg");background-size:auto,360px 180px;box-shadow:inset 0 0 45px #16341455}
-#stage{filter:drop-shadow(0 9px 9px #0005)}
-#arena{overflow:visible}
-.sand{background:
- linear-gradient(#e2c28a18,#e2c28a18),url("sand_ref.jpg")!important;background-size:auto,380px 380px!important;box-shadow:inset 0 0 24px #76512625}
-.grid{opacity:.035}
-.fence{inset:-10px!important;border:0!important;box-shadow:none!important;background:
- linear-gradient(#9c6739,#633b20) top/100% 7px no-repeat,
- linear-gradient(#9c6739,#633b20) bottom/100% 7px no-repeat,
- linear-gradient(90deg,#9c6739,#633b20) left/7px 100% no-repeat,
- linear-gradient(90deg,#9c6739,#633b20) right/7px 100% no-repeat;filter:drop-shadow(3px 5px 3px #0006)!important}
-.fence:after{content:"";position:absolute;inset:-4px;border:5px dashed #7c4a29;opacity:.9;filter:drop-shadow(1px 2px 1px #0004)}
-.sidebar{width:300px;padding:13px 11px;background:#fff;border-left:1px solid #d9dee2;box-shadow:-3px 0 8px #0000000b}
-.tabs{height:46px;border:1px solid #d9dee2;border-radius:8px;overflow:hidden;background:#fff}
-.tabs button{font-size:16px;color:#087bd0}.tabs button.active{background:#d8ecff;color:#0878c7;font-weight:700}
-.obstacle-grid{gap:9px}
-.add{min-height:132px;border:1px solid #d9dee2;border-radius:8px;background:linear-gradient(#fff,#fcfcfc);box-shadow:0 1px 2px #0000000b;font-size:15px}
-.jumpicon{width:104px;height:54px;border-left:8px solid #e2e2df;border-right:8px solid #e2e2df;background:repeating-linear-gradient(0deg,transparent 0 7px,#1685d4 8px 12px,transparent 13px 17px);filter:drop-shadow(3px 5px 2px #0004);transform:perspective(120px) rotateX(7deg)}
-.oxericon{background:repeating-linear-gradient(0deg,transparent 0 7px,#d3332f 8px 12px,transparent 13px 17px)}
-.poleicon{width:110px;height:9px;border:0;background:repeating-linear-gradient(90deg,#245f3d 0 24px,#f0ebe0 24px 48px);box-shadow:3px 5px 3px #0004;transform:rotate(6deg)}
-.coneicon{filter:drop-shadow(3px 5px 2px #0004)}
-.settings{border:1px solid #d9dee2;border-radius:8px;background:#fff}
-.switchrow{color:#1688df;border-bottom:1px solid #e6e8e9;padding:9px 5px}
-.toggleDot{font-size:0!important;width:38px;height:22px;border-radius:13px;background:#c8cdd1;display:inline-block;position:relative}
-.toggleDot:after{content:"";position:absolute;left:2px;top:2px;width:18px;height:18px;border-radius:50%;background:white;box-shadow:0 1px 3px #0004}
-.switchrow.active .toggleDot{background:#229be9}.switchrow.active .toggleDot:after{left:18px}
-.obstacle.rail,.obstacle.oxer{height:18px!important;border:0!important;border-radius:1px;background:repeating-linear-gradient(90deg,#167fc7 0 12%,#f4f1e8 12% 24%)!important;box-shadow:-7px -9px 0 -3px #eee,-7px 9px 0 -3px #aaa,7px -9px 0 -3px #eee,7px 9px 0 -3px #aaa,3px 7px 4px #0005!important;filter:drop-shadow(2px 4px 2px #0004)!important}
-.obstacle.oxer{height:25px!important;background:repeating-linear-gradient(90deg,#cf3832 0 12%,#f4f1e8 12% 24%)!important}
-.obstacle.groundpole{height:7px!important;background:repeating-linear-gradient(90deg,#24613f 0 18%,#f0ebe0 18% 36%)!important;box-shadow:3px 5px 3px #0005!important}
-.obstacle.cone{width:17px!important;height:27px!important;background:linear-gradient(90deg,#d35314,#ff9136 48%,#d35314)!important;clip-path:polygon(42% 0,58% 0,78% 75%,100% 82%,100% 100%,0 100%,0 82%,22% 75%);filter:drop-shadow(3px 5px 2px #0005)!important}
-@media(max-width:1050px){.sidebar{width:280px}.appbar{height:76px}.workspace{top:76px}.brand{font-size:25px}}
+/* v8 – clean asset build */
+#viewport{background:
+ linear-gradient(rgba(45,75,31,.08),rgba(45,75,31,.08)),
+ url("assets/grass.jpg");background-size:auto,260px 260px}
+.sand{background:url("assets/sand.jpg")!important;background-size:300px 300px!important;box-shadow:inset 0 0 28px #73502035}
+.grid{opacity:.045}
+.fence{inset:-12px!important;border:0!important;box-shadow:none!important;
+ background:
+ repeating-linear-gradient(90deg,#68401f 0 5px,#b47b42 5px 11px,#714522 11px 16px) top/100% 8px no-repeat,
+ repeating-linear-gradient(90deg,#68401f 0 5px,#b47b42 5px 11px,#714522 11px 16px) bottom/100% 8px no-repeat,
+ repeating-linear-gradient(0deg,#68401f 0 5px,#b47b42 5px 11px,#714522 11px 16px) left/8px 100% no-repeat,
+ repeating-linear-gradient(0deg,#68401f 0 5px,#b47b42 5px 11px,#714522 11px 16px) right/8px 100% no-repeat;
+ filter:drop-shadow(3px 5px 3px #0006)!important}
+.fence:after{content:"";position:absolute;inset:-5px;border:5px dashed #714522;filter:drop-shadow(1px 2px 1px #0005)}
+.obstacle.rail,.obstacle.oxer,.obstacle.groundpole,.obstacle.cone{
+ border:0!important;box-shadow:none!important;background-color:transparent!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;filter:none!important}
+.obstacle.rail{height:42px!important;background-image:url("assets/rail.svg")!important}
+.obstacle.oxer{height:48px!important;background-image:url("assets/oxer.svg")!important}
+.obstacle.groundpole{height:22px!important;background-image:url("assets/pole.svg")!important}
+.obstacle.cone{width:24px!important;height:31px!important;clip-path:none!important;background-image:url("assets/cone.svg")!important}
+.obstacle.rail:before,.obstacle.rail:after,.obstacle.oxer:before,.obstacle.oxer:after,.obstacle.groundpole:after,.obstacle.cone:after{display:none!important}
+.jumpicon{width:112px;height:58px!important;border:0!important;background:url("assets/rail.svg") center/contain no-repeat!important;filter:none!important;transform:none!important}
+.oxericon{background-image:url("assets/oxer.svg")!important}
+.poleicon{width:112px!important;height:40px!important;border:0!important;background:url("assets/pole.svg") center/contain no-repeat!important;box-shadow:none!important;transform:none!important}
+.coneicon{width:58px!important;height:58px!important;background:url("assets/cone.svg") center/contain no-repeat!important;filter:none!important}
+.coneicon:before,.coneicon:after{display:none!important}
+.sidebar{background:#fff}
