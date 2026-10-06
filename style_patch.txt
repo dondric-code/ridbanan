@@ -1,0 +1,3 @@
+
+.toolbar button.active{background:#c55d3b;color:#fff;border-color:#c55d3b}
+.toolbar button:disabled{opacity:.45}
