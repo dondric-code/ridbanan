@@ -183,3 +183,55 @@ aside h5{font-size:9px;letter-spacing:.06em;margin:12px 2px 5px}.card{border:1px
 .obstacle-grid .jumpicon:not(.oxericon){
  background:repeating-linear-gradient(0deg,transparent 0 5px,#1680c5 6px 9px,transparent 10px 13px)!important;
 }
+
+/* v13 – sidebar obstacle cards match approved reference; scale removed */
+#scale{display:none!important}
+
+.obstacle-grid .add{
+ min-height:132px!important;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:center!important;
+ justify-content:center!important;
+ gap:5px!important;
+ padding:9px!important;
+ overflow:hidden!important;
+ text-align:center!important;
+}
+.obstacle-grid .add .jumpicon{
+ width:104px!important;height:48px!important;
+ margin:0 auto 2px!important;
+ border-left:7px solid #9a9d9c!important;
+ border-right:7px solid #9a9d9c!important;
+ filter:drop-shadow(2px 4px 2px rgba(0,0,0,.28))!important;
+}
+/* Rail: blue / white */
+.obstacle-grid .add .jumpicon:not(.oxericon){
+ background:repeating-linear-gradient(0deg,transparent 0 6px,#1680c5 7px 11px,transparent 12px 16px)!important;
+}
+/* Oxer: red / white */
+.obstacle-grid .add .oxericon{
+ background:repeating-linear-gradient(0deg,transparent 0 6px,#c83b34 7px 11px,transparent 12px 16px)!important;
+}
+/* Ground pole: green / white */
+.obstacle-grid .add .poleicon{
+ width:112px!important;height:8px!important;
+ margin:16px auto 15px!important;
+ background:repeating-linear-gradient(90deg,#17624b 0 16%,#f5f1e7 16% 32%)!important;
+ border:1px solid #4b514b!important;border-radius:4px!important;
+ box-shadow:2px 4px 2px rgba(0,0,0,.28)!important;
+}
+/* Cone: same visual construction as arena cone */
+.obstacle-grid .add .coneicon{
+ width:24px!important;height:36px!important;
+ margin:3px auto!important;
+ background:linear-gradient(90deg,#d75c15,#ff963d 50%,#d75c15)!important;
+ clip-path:polygon(38% 0,62% 0,80% 75%,100% 80%,100% 100%,0 100%,0 80%,20% 75%)!important;
+ filter:drop-shadow(3px 5px 2px rgba(0,0,0,.35))!important;
+}
+.obstacle-grid .add .coneicon:before{display:none!important}
+.obstacle-grid .add .coneicon:after{
+ display:block!important;content:"";position:absolute!important;
+ left:3px!important;right:3px!important;top:14px!important;
+ width:auto!important;height:4px!important;background:#f7f2e7!important;border-radius:0!important;
+}
