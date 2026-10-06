@@ -23,3 +23,5 @@ main{height:calc(100% - 58px);display:grid;grid-template-rows:auto 1fr 34px}
 .dimension{position:absolute;font-size:12px;font-weight:700;color:#555;pointer-events:none}.width{left:50%;top:-30px;transform:translateX(-50%)}.length{right:-45px;top:50%;transform:translateY(-50%) rotate(90deg)}
 footer{background:#fff;border-top:1px solid #d9d5cc;display:flex;align-items:center;justify-content:center;gap:18px;font-size:11px;color:#777;padding:0 8px}
 @media(max-width:650px){#viewport{padding:45px 35px}.toolbar{padding:7px}.toolbar button,.toolbar select{padding:8px 10px}footer span:last-child{display:none}}
+.toolbar button.active{background:#c55d3b;color:#fff;border-color:#c55d3b}
+.toolbar button:disabled{opacity:.45}
