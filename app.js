@@ -65,9 +65,27 @@ async function arenaImage(){
 }
 $("savePng").onclick=async()=>{
   try{
-    let c=await arenaImage(),a=document.createElement("a");
-    a.download="ridbanan.png";a.href=c.toDataURL("image/png");a.click();$("saveMenu").hidden=true;
-  }catch(e){alert("Kunde inte skapa PNG. Kontrollera internetanslutningen och försök igen.")}
+    const c=await arenaImage();
+    const blob=await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error("PNG kunde inte skapas")),"image/png"));
+    const file=new File([blob],"ridbanan.png",{type:"image/png"});
+    $("saveMenu").hidden=true;
+
+    // iPhone/iPad: share sheet is much more reliable than <a download>.
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:"Ridbanan"});
+      return;
+    }
+
+    // Desktop/other browsers: normal download.
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;a.download="ridbanan.png";
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+  }catch(e){
+    if(e && e.name==="AbortError")return;
+    alert("Kunde inte spara PNG: "+(e?.message||"okänt fel"));
+  }
 };
 $("savePdf").onclick=async()=>{
   try{
@@ -90,30 +108,61 @@ $("toggleSidePanel").onclick=()=>{document.body.classList.toggle("side-hidden");
 $("toggleTopPanel").onclick=()=>{document.body.classList.toggle("top-hidden");setTimeout(render,220)};
 if(matchMedia("(max-width:700px)").matches)document.body.classList.add("side-hidden");
 
-// Two-finger pan + pinch zoom on the arena viewport.
-// One finger remains reserved for moving/rotating obstacles and drawing the riding line.
+
+// v18: stable two-finger pan + pinch.
+// Uses the finger midpoint as the zoom anchor, so the arena no longer jumps while pinching.
 let gesture=null;
-const td=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+function twoTouchInfo(e){
+  const a=e.touches[0],b=e.touches[1];
+  return {
+    x:(a.clientX+b.clientX)/2,
+    y:(a.clientY+b.clientY)/2,
+    d:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)
+  };
+}
 VP.addEventListener("touchstart",e=>{
-  if(e.touches.length===2){
-    e.preventDefault();document.body.classList.add("gesturing");
-    let a=e.touches[0],b=e.touches[1];
-    gesture={d:td(a,b),z,scrollLeft:VP.scrollLeft,scrollTop:VP.scrollTop,
-      cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2};
-  }
-},{passive:false});
-VP.addEventListener("touchmove",e=>{
-  if(!gesture||e.touches.length!==2)return;
+  if(e.touches.length!==2)return;
   e.preventDefault();
-  let a=e.touches[0],b=e.touches[1],cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;
-  let nz=clamp(gesture.z*td(a,b)/gesture.d,.55,2.5);
-  if(Math.abs(nz-z)>.025){z=nz;render()}
-  VP.scrollLeft=gesture.scrollLeft-(cx-gesture.cx);
-  VP.scrollTop=gesture.scrollTop-(cy-gesture.cy);
+  const g=twoTouchInfo(e), r=VP.getBoundingClientRect();
+  gesture={
+    startZ:z,
+    startD:Math.max(g.d,1),
+    startX:g.x,startY:g.y,
+    startLeft:VP.scrollLeft,startTop:VP.scrollTop,
+    // content coordinate under the midpoint before zoom
+    anchorX:VP.scrollLeft + (g.x-r.left),
+    anchorY:VP.scrollTop + (g.y-r.top)
+  };
+  document.body.classList.add("gesturing");
 },{passive:false});
-VP.addEventListener("touchend",e=>{
-  if(e.touches.length<2){gesture=null;document.body.classList.remove("gesturing")}
+
+VP.addEventListener("touchmove",e=>{
+  if(!gesture || e.touches.length!==2)return;
+  e.preventDefault();
+  const g=twoTouchInfo(e), r=VP.getBoundingClientRect();
+  const oldZ=z;
+  const newZ=clamp(gesture.startZ*(g.d/gesture.startD),.55,2.5);
+
+  if(Math.abs(newZ-oldZ)>.004){
+    z=newZ;
+    render();
+  }
+
+  const scale=z/gesture.startZ;
+  // Preserve the original arena point under the current finger midpoint,
+  // while midpoint movement itself becomes panning.
+  VP.scrollLeft = gesture.anchorX*scale - (g.x-r.left);
+  VP.scrollTop  = gesture.anchorY*scale - (g.y-r.top);
 },{passive:false});
+
+function endGesture(e){
+  if(!gesture)return;
+  if(!e.touches || e.touches.length<2){
+    gesture=null;
+    document.body.classList.remove("gesturing");
+  }
+}
+VP.addEventListener("touchend",endGesture,{passive:false});
 VP.addEventListener("touchcancel",()=>{gesture=null;document.body.classList.remove("gesturing")},{passive:false});
 
 let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(render,100)});

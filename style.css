@@ -378,3 +378,13 @@ body.gesturing #viewport{touch-action:none!important}
  .paneltoggles{right:7px}
  .brand{min-width:118px}
 }
+
+/* v18 – smoother arena gestures */
+#viewport{
+  overscroll-behavior:none!important;
+  scroll-behavior:auto!important;
+}
+body.gesturing #viewport{
+  touch-action:none!important;
+  -webkit-overflow-scrolling:auto!important;
+}
