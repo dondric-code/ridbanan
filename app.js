@@ -221,6 +221,12 @@ $("savePdf").onclick=async()=>{
 };
 $("newArena").onclick=()=>{if(!confirm("Skapa en ny bana? Den nuvarande banan rensas."))return;W=20;H=60;z=1;O=[];path=[];start={x:2,y:56};finish={x:18,y:4};sel={kind:"start"};multiSel.clear();$("arenaSize").value="20,60";$("arenaSizePanel").value="20,60";render()};
 
+A.addEventListener("pointerdown",e=>{
+ if(draw||e.target.closest(".obstacle,.point"))return;
+ let best=null,bd=30;
+ A.querySelectorAll(".obstacle").forEach(el=>{let r=el.getBoundingClientRect(),dx=e.clientX-(r.left+r.right)/2,dy=e.clientY-(r.top+r.bottom)/2,d=Math.hypot(dx,dy);if(d<bd){bd=d;best=el}});
+ if(best&&best.onpointerdown){best.onpointerdown(e)}
+},{capture:true});
 let drawing=false,did;A.addEventListener("pointerdown",e=>{if(!draw||e.target.closest(".obstacle,.point"))return;e.preventDefault();drawing=true;did=e.pointerId;path=[point(e)];try{A.setPointerCapture(did)}catch(_){}route()});A.addEventListener("pointermove",e=>{if(!drawing||e.pointerId!==did)return;let p=point(e),l=path.at(-1);if(dist(l,p)>.2){path.push(p);route()}});A.addEventListener("pointerup",()=>drawing=false);A.addEventListener("pointercancel",()=>drawing=false);
 
 // Panel controls

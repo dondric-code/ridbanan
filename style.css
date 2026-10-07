@@ -392,3 +392,19 @@ body.gesturing #viewport{
 .obstacle.oxer{background:none!important;border:0!important;box-shadow:none!important;height:var(--oxer-px,25px)!important;min-height:16px!important}
 .obstacle.oxer:before,.obstacle.oxer:after{content:"";position:absolute;left:0;right:0;height:7px;border:1px solid #5e625f;background:repeating-linear-gradient(90deg,#c83b34 0 12%,#f4f1e7 12% 24%);box-shadow:-9px 0 0 #888d87,9px 0 0 #888d87,2px 3px 2px rgba(0,0,0,.28)}
 .obstacle.oxer:before{top:0}.obstacle.oxer:after{bottom:0}
+
+/* v23 improved touch targets */
+.obstacle{touch-action:none}
+.obstacle .num{pointer-events:auto!important;min-width:42px!important;height:42px!important;display:flex!important;align-items:center!important;justify-content:center!important;z-index:8!important}
+
+/* v24: restore oxer icon reliably without pseudo-elements */
+.obstacle.oxer{
+  background:
+    repeating-linear-gradient(90deg,#c83b34 0 12%,#f4f1e7 12% 24%) top/100% 7px no-repeat,
+    repeating-linear-gradient(90deg,#c83b34 0 12%,#f4f1e7 12% 24%) bottom/100% 7px no-repeat!important;
+  border-left:7px solid #888d87!important;
+  border-right:7px solid #888d87!important;
+  box-sizing:border-box!important;
+  box-shadow:2px 3px 3px rgba(0,0,0,.28)!important;
+}
+.obstacle.oxer:before,.obstacle.oxer:after{content:none!important;display:none!important}
