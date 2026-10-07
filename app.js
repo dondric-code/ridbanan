@@ -4,7 +4,7 @@ let W=20,H=60,z=1,rot=false,hide=false,nums=true,showRoute=true,draw=false,showD
 let path=[],multiSel=new Set(),start={x:2,y:56},finish={x:18,y:4};
 let O=[{x:6,y:48,type:"rail",angle:0,height:80},{x:7,y:36,type:"oxer",angle:0,height:100},{x:14,y:25,type:"oxer",angle:15,height:90},{x:15,y:13,type:"groundpole",angle:0},{x:10,y:7,type:"cone",angle:0}].map(o=>({...o,edge:false}));
 let sel={kind:"obstacle",index:0};
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),oxerSpread=o=>o?.type==="oxer"?(o.oxerWidth==null?(Number(o.height)||80)/100:Number(o.oxerWidth)):0,dist=(a,b)=>{let dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,da=oxerSpread(a)/2,db=oxerSpread(b)/2;return Math.max(0,Math.hypot((b.x-ux*db)-(a.x+ux*da),(b.y-uy*db)-(a.y+uy*da)))},nm=t=>t==="rail"?"Räcke":t==="oxer"?"Oxer":t==="groundpole"?"Markbom":"Kon";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),oxerSpread=o=>o?.type==="oxer"?(o.oxerWidth==null?(Number(o.height)||80)/100:Number(o.oxerWidth)):0,dist=(a,b)=>{let dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,da=oxerSpread(a)/2;return Math.max(0,Math.hypot(b.x-(a.x+ux*da),b.y-(a.y+uy*da)))},nm=t=>t==="rail"?"Räcke":t==="oxer"?"Oxer":t==="groundpole"?"Markbom":"Kon";
 function fit(){let r=VP.getBoundingClientRect(),pad=34,aw=Math.max(260,r.width-pad*2),ah=Math.max(360,r.height-pad*2),w=Math.min(aw,ah*W/H)*z;return Math.max(220,w)}
 function point(e){let r=A.getBoundingClientRect();return{x:clamp((e.clientX-r.left)/r.width*W,0,W),y:clamp((e.clientY-r.top)/r.height*H,0,H)}}
 function pos(e,o){e.style.left=o.x/W*100+"%";e.style.top=o.y/H*100+"%"}
@@ -22,7 +22,7 @@ function measures(){A.querySelectorAll(".measure,.distance-line").forEach(e=>e.r
 function route(){R.innerHTML="";if(!showRoute||path.length<2)return;let ns="http://www.w3.org/2000/svg",p=document.createElementNS(ns,"polyline");p.setAttribute("class","ridepath");p.setAttribute("points",path.map(o=>o.x/W*1000+","+o.y/H*2000).join(" "));R.append(p);for(let i=8;i<path.length;i+=12){let a=path[i-1],b=path[i],x=b.x/W*1000,y=b.y/H*2000,ang=Math.atan2((b.y-a.y)/H*2000,(b.x-a.x)/W*1000)*180/Math.PI,e=document.createElementNS(ns,"path");e.setAttribute("class","arrow");e.setAttribute("d","M -15 -10 L 0 0 L -15 10");e.setAttribute("transform",`translate(${x} ${y}) rotate(${ang})`);R.append(e)}}
 function updateSelection(){A.querySelectorAll(".selected,.multi-selected").forEach(e=>e.classList.remove("selected","multi-selected"));if(sel.kind==="obstacle")A.querySelectorAll(".obstacle")[sel.index]?.classList.add("selected");else A.querySelector("."+sel.kind)?.classList.add("selected");A.querySelectorAll(".obstacle").forEach((e,i)=>e.classList.toggle("multi-selected",multiSel.has(i)));let o=sel.kind==="obstacle"?O[sel.index]:null;$("selectedType").disabled=!o;if(o)$("selectedType").value=o.type;$("heightField").style.display=o&&["rail","oxer"].includes(o.type)?"flex":"none";$("oxerWidthField").style.display=o?.type==="oxer"?"flex":"none";if(o?.height)$("heightSelect").value=o.height;if(o?.type==="oxer")$("oxerWidthSelect").value=o.oxerWidth==null?"auto":String(o.oxerWidth);$("rotate").classList.toggle("active",rot);let chosen=multiMode&&multiSel.size?[...multiSel].map(i=>O[i]).filter(Boolean):(o?[o]:[]);$("edgeMeasures").classList.toggle("active",!!(chosen.length&&chosen.every(x=>x.edge)));let ed=$("edgeMeasures").querySelector(".toggleDot");if(ed)ed.textContent=(chosen.length&&chosen.every(x=>x.edge))?"●":"○";measures()}
 function render(){A.querySelectorAll(".obstacle,.point,.measure,.distance-line").forEach(e=>e.remove());let w=fit();S.style.width=A.style.width=w+"px";S.style.height=A.style.height=w*H/W+"px";$("widthLabel").textContent=W+" m";$("lengthLabel").textContent=H+" m";$("zoomText").textContent=Math.round(z*100)+"%";let n=0;
- O.forEach((o,i)=>{let e=document.createElement("div");e.className="obstacle "+o.type;e.style.setProperty("--a",(o.angle||0)+"deg");if(o.type!=="cone")e.style.width=3/W*100+"%";if(o.type==="oxer")e.style.setProperty("--oxer-px",Math.max(16,oxerSpread(o)/H*A.clientHeight)+"px");let h="";if(o.type!=="cone"){n++;if(nums)h=`<span class=num>${n}</span>`}if(["rail","oxer"].includes(o.type))h+=`<span class=height-label>${o.height} cm</span>`;e.innerHTML=h;if(o.type==="oxer"){let f=document.createElement("i"),b=document.createElement("i");f.className="oxerRail oxerFront";b.className="oxerRail oxerBack";e.prepend(b);e.prepend(f)}pos(e,o);A.append(e);drag(e,o,{kind:"obstacle",index:i})});
+ O.forEach((o,i)=>{let e=document.createElement("div");e.className="obstacle "+o.type;e.style.setProperty("--a",(o.angle||0)+"deg");if(o.type!=="cone")e.style.width=3/W*100+"%";if(o.type==="oxer")e.style.setProperty("--oxer-px",Math.max(16,oxerSpread(o)/H*A.clientHeight)+"px");let h="";if(o.type!=="cone"){n++;if(nums)h=`<span class=num>${n}</span>`}if(["rail","oxer"].includes(o.type))h+=`<span class=height-label>${o.height} cm</span>`;e.innerHTML=h;pos(e,o);A.append(e);drag(e,o,{kind:"obstacle",index:i})});
  [["start","START",start],["finish","MÅL",finish]].forEach(v=>{let e=document.createElement("div");e.className="point "+v[0];e.textContent=v[1];pos(e,v[2]);A.append(e);drag(e,v[2],{kind:v[0]})});route();updateSelection()}
 function add(t){let o={x:W/2,y:H/2,type:t,angle:0,edge:false};if(["rail","oxer"].includes(t))o.height=80;if(t==="oxer")o.oxerWidth=null;O.push(o);sel={kind:"obstacle",index:O.length-1};render()}
 for(let h=30;h<=150;h+=10)$("heightSelect").insertAdjacentHTML("beforeend",`<option value="${h}">${h} cm</option>`);
@@ -223,9 +223,21 @@ $("newArena").onclick=()=>{if(!confirm("Skapa en ny bana? Den nuvarande banan re
 
 A.addEventListener("pointerdown",e=>{
  if(draw||e.target.closest(".obstacle,.point"))return;
- let best=null,bd=44;
- A.querySelectorAll(".obstacle").forEach(el=>{let r=el.getBoundingClientRect(),pad=el.classList.contains("cone")?30:18,dx=Math.max(r.left-pad-e.clientX,0,e.clientX-(r.right+pad)),dy=Math.max(r.top-pad-e.clientY,0,e.clientY-(r.bottom+pad)),d=Math.hypot(dx,dy);if(d<bd){bd=d;best=el}});
+ let best=null,bd=30;
+ A.querySelectorAll(".obstacle").forEach(el=>{let r=el.getBoundingClientRect(),dx=e.clientX-(r.left+r.right)/2,dy=e.clientY-(r.top+r.bottom)/2,d=Math.hypot(dx,dy);if(d<bd){bd=d;best=el}});
  if(best&&best.onpointerdown){best.onpointerdown(e)}
+},{capture:true});
+A.addEventListener("pointerdown",e=>{
+ if(draw||e.target.closest(".obstacle,.point"))return;
+ let best=null,bd=Infinity;
+ A.querySelectorAll(".obstacle").forEach(el=>{
+   let r=el.getBoundingClientRect(),pad=el.classList.contains("cone")?30:14;
+   let dx=Math.max(r.left-pad-e.clientX,0,e.clientX-r.right-pad);
+   let dy=Math.max(r.top-pad-e.clientY,0,e.clientY-r.bottom-pad);
+   let d=Math.hypot(dx,dy);
+   if(d<bd && d<=pad){bd=d;best=el}
+ });
+ if(best&&best.onpointerdown)best.onpointerdown(e);
 },{capture:true});
 let drawing=false,did;A.addEventListener("pointerdown",e=>{if(!draw||e.target.closest(".obstacle,.point"))return;e.preventDefault();drawing=true;did=e.pointerId;path=[point(e)];try{A.setPointerCapture(did)}catch(_){}route()});A.addEventListener("pointermove",e=>{if(!drawing||e.pointerId!==did)return;let p=point(e),l=path.at(-1);if(dist(l,p)>.2){path.push(p);route()}});A.addEventListener("pointerup",()=>drawing=false);A.addEventListener("pointercancel",()=>drawing=false);
 
