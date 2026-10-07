@@ -158,7 +158,7 @@ async function arenaImage(){
     x.restore();
 
     if(o.type!=="cone"&&nums&&num!=null)textBox(String(num),cx,cy-43,{fs:18,r:18,px:9,py:7});
-    if((o.type==="rail"||o.type==="oxer")&&o.height)textBox(o.height+" cm",cx,cy+43,{fs:18,bold:false});
+    if(showHeights&&(o.type==="rail"||o.type==="oxer")&&o.height)textBox(o.height+" cm",cx,cy+43,{fs:18,bold:false});
   }
 
   let no=0;
@@ -282,6 +282,15 @@ function endGesture(e){
 }
 VP.addEventListener("touchend",endGesture,{passive:false});
 VP.addEventListener("touchcancel",()=>{gesture=null;document.body.classList.remove("gesturing")},{passive:false});
+
+
+let showHeights=true;
+$("toggleHeights").onclick=()=>{
+  showHeights=!showHeights;
+  $("toggleHeights").querySelector(".toggleDot").textContent=showHeights?"●":"○";
+  document.body.classList.toggle("hide-heights",!showHeights);
+  render();
+};
 
 let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(render,100)});
 try{let sv=JSON.parse(localStorage.getItem("ridbanan-save")||"null");if(sv&&sv.version===1){W=sv.W||20;H=sv.H||60;O=Array.isArray(sv.O)?sv.O:O;start=sv.start||start;finish=sv.finish||finish;path=sv.path||[];$("arenaSize").value=W+","+H;$("arenaSizePanel").value=W+","+H}}catch(_){}
