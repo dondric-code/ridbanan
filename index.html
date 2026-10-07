@@ -1,4 +1,4 @@
-<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>Ridbanan</title><link rel="stylesheet" href="style.css?v=hybrid20"><style>body.hide-heights .height-label{display:none!important}</style></head><body>
+<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>Ridbanan</title><link rel="stylesheet" href="style.css?v=hybrid22"><style>body.hide-heights .height-label{display:none!important}</style></head><body>
 <div class="paneltoggles">
   <button id="toggleTopPanel" title="Visa/dölj verktygsfält">☰</button>
   <button id="toggleSidePanel" title="Visa/dölj sidopanel">☷</button>
@@ -45,7 +45,7 @@
 <select id="selectedType"><option value="rail">Räcke</option><option value="oxer">Oxer</option><option value="groundpole">Markbom</option><option value="cone">Kon</option></select>
 </label>
       <label id="heightField">Höjd<select id="heightSelect"></select></label>
-      <label id="oxerWidthField">Oxerbredd<select id="oxerWidthSelect"><option>.5</option><option>.7</option><option>.9</option><option>1.1</option><option>1.3</option><option>1.5</option></select></label>
+      <label id="oxerWidthField">Oxerbredd<select id="oxerWidthSelect"><option value="auto">Följer höjd</option><option value=".5">50 cm</option><option value=".6">60 cm</option><option value=".7">70 cm</option><option value=".8">80 cm</option><option value=".9">90 cm</option><option value="1">100 cm</option><option value="1.1">110 cm</option><option value="1.2">120 cm</option><option value="1.3">130 cm</option><option value="1.4">140 cm</option><option value="1.5">150 cm</option></select></label>
     </div>
 
     <h5>VISA</h5>
@@ -54,7 +54,7 @@
     <button class="switchrow" id="toggleHeights">Hinderhöjd <span class="toggleDot">●</span></button><button class="switchrow" id="toggleNumbers">Hindernummer <span class="toggleDot">●</span></button>
     <button class="switchrow" id="toggleRoute">Ridväg med pilar <span class="toggleDot">●</span></button>
     <button class="switchrow" id="clearRoute">Rensa ridväg</button>
-    <div class="bottomcontrols"><select id="arenaSize"><option value="20,60" selected>20 × 60 m</option><option value="20,40">20 × 40 m</option><option value="30,50">30 × 50 m</option></select><button id="zoomOut">−</button><span id="zoomText">100%</span><button id="zoomIn">+</button></div>
+    <div class="bottomcontrols"><select id="arenaSize"><option value="20,60" selected>20 × 60 m</option><option value="20,40">20 × 40 m</option><option value="30,50">30 × 50 m</option><option value="custom">Anpassat mått…</option></select><div id="customArena" style="display:none;gap:6px;align-items:center;margin-top:6px"><select id="customW"><option>10</option><option selected>20</option><option>30</option><option>40</option><option>50</option><option>60</option><option>70</option><option>80</option><option>90</option><option>100</option></select><span>×</span><select id="customH"><option>10</option><option>20</option><option>30</option><option>40</option><option>50</option><option selected>60</option><option>70</option><option>80</option><option>90</option><option>100</option></select><span>m</span><button id="applyCustomArena" type="button">Använd</button></div><button id="zoomOut">−</button><span id="zoomText">100%</span><button id="zoomIn">+</button></div>
   </aside>
 </main>
 <div id="saveMenu" class="save-menu" hidden>
@@ -67,4 +67,4 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
-<script src="app.js?v=hybrid20"></script></body></html>
+<script src="app.js?v=hybrid22"></script></body></html>

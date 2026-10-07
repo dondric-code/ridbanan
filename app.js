@@ -4,7 +4,7 @@ let W=20,H=60,z=1,rot=false,hide=false,nums=true,showRoute=true,draw=false,showD
 let path=[],multiSel=new Set(),start={x:2,y:56},finish={x:18,y:4};
 let O=[{x:6,y:48,type:"rail",angle:0,height:80},{x:7,y:36,type:"oxer",angle:0,height:100},{x:14,y:25,type:"oxer",angle:15,height:90},{x:15,y:13,type:"groundpole",angle:0},{x:10,y:7,type:"cone",angle:0}].map(o=>({...o,edge:false}));
 let sel={kind:"obstacle",index:0};
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),nm=t=>t==="rail"?"Räcke":t==="oxer"?"Oxer":t==="groundpole"?"Markbom":"Kon";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),oxerSpread=o=>o?.type==="oxer"?(o.oxerWidth==null?(Number(o.height)||80)/100:Number(o.oxerWidth)):0,dist=(a,b)=>{let dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,da=oxerSpread(a)/2,db=oxerSpread(b)/2;return Math.max(0,Math.hypot((b.x-ux*db)-(a.x+ux*da),(b.y-uy*db)-(a.y+uy*da)))},nm=t=>t==="rail"?"Räcke":t==="oxer"?"Oxer":t==="groundpole"?"Markbom":"Kon";
 function fit(){let r=VP.getBoundingClientRect(),pad=34,aw=Math.max(260,r.width-pad*2),ah=Math.max(360,r.height-pad*2),w=Math.min(aw,ah*W/H)*z;return Math.max(220,w)}
 function point(e){let r=A.getBoundingClientRect();return{x:clamp((e.clientX-r.left)/r.width*W,0,W),y:clamp((e.clientY-r.top)/r.height*H,0,H)}}
 function pos(e,o){e.style.left=o.x/W*100+"%";e.style.top=o.y/H*100+"%"}
@@ -20,15 +20,15 @@ function measures(){A.querySelectorAll(".measure,.distance-line").forEach(e=>e.r
  let chosen=multiMode&&multiSel.size?[...multiSel].map(i=>O[i]).filter(Boolean):(sel.kind==="obstacle"?[O[sel.index]]:[]);
  chosen.filter(o=>o&&o.edge).forEach(o=>[[o.x/2,o.y,o.x],[(o.x+W)/2,o.y,W-o.x],[o.x,o.y/2,o.y],[o.x,(o.y+H)/2,H-o.y]].forEach(q=>{let e=document.createElement("span");e.className="measure edge";e.textContent=q[2].toFixed(1)+" m";e.style.left=q[0]/W*100+"%";e.style.top=q[1]/H*100+"%";A.append(e)}))}
 function route(){R.innerHTML="";if(!showRoute||path.length<2)return;let ns="http://www.w3.org/2000/svg",p=document.createElementNS(ns,"polyline");p.setAttribute("class","ridepath");p.setAttribute("points",path.map(o=>o.x/W*1000+","+o.y/H*2000).join(" "));R.append(p);for(let i=8;i<path.length;i+=12){let a=path[i-1],b=path[i],x=b.x/W*1000,y=b.y/H*2000,ang=Math.atan2((b.y-a.y)/H*2000,(b.x-a.x)/W*1000)*180/Math.PI,e=document.createElementNS(ns,"path");e.setAttribute("class","arrow");e.setAttribute("d","M -15 -10 L 0 0 L -15 10");e.setAttribute("transform",`translate(${x} ${y}) rotate(${ang})`);R.append(e)}}
-function updateSelection(){A.querySelectorAll(".selected,.multi-selected").forEach(e=>e.classList.remove("selected","multi-selected"));if(sel.kind==="obstacle")A.querySelectorAll(".obstacle")[sel.index]?.classList.add("selected");else A.querySelector("."+sel.kind)?.classList.add("selected");A.querySelectorAll(".obstacle").forEach((e,i)=>e.classList.toggle("multi-selected",multiSel.has(i)));let o=sel.kind==="obstacle"?O[sel.index]:null;$("selectedType").disabled=!o;if(o)$("selectedType").value=o.type;$("heightField").style.display=o&&["rail","oxer"].includes(o.type)?"flex":"none";$("oxerWidthField").style.display=o?.type==="oxer"?"flex":"none";if(o?.height)$("heightSelect").value=o.height;$("rotate").classList.toggle("active",rot);let chosen=multiMode&&multiSel.size?[...multiSel].map(i=>O[i]).filter(Boolean):(o?[o]:[]);$("edgeMeasures").classList.toggle("active",!!(chosen.length&&chosen.every(x=>x.edge)));let ed=$("edgeMeasures").querySelector(".toggleDot");if(ed)ed.textContent=(chosen.length&&chosen.every(x=>x.edge))?"●":"○";measures()}
+function updateSelection(){A.querySelectorAll(".selected,.multi-selected").forEach(e=>e.classList.remove("selected","multi-selected"));if(sel.kind==="obstacle")A.querySelectorAll(".obstacle")[sel.index]?.classList.add("selected");else A.querySelector("."+sel.kind)?.classList.add("selected");A.querySelectorAll(".obstacle").forEach((e,i)=>e.classList.toggle("multi-selected",multiSel.has(i)));let o=sel.kind==="obstacle"?O[sel.index]:null;$("selectedType").disabled=!o;if(o)$("selectedType").value=o.type;$("heightField").style.display=o&&["rail","oxer"].includes(o.type)?"flex":"none";$("oxerWidthField").style.display=o?.type==="oxer"?"flex":"none";if(o?.height)$("heightSelect").value=o.height;if(o?.type==="oxer")$("oxerWidthSelect").value=o.oxerWidth==null?"auto":String(o.oxerWidth);$("rotate").classList.toggle("active",rot);let chosen=multiMode&&multiSel.size?[...multiSel].map(i=>O[i]).filter(Boolean):(o?[o]:[]);$("edgeMeasures").classList.toggle("active",!!(chosen.length&&chosen.every(x=>x.edge)));let ed=$("edgeMeasures").querySelector(".toggleDot");if(ed)ed.textContent=(chosen.length&&chosen.every(x=>x.edge))?"●":"○";measures()}
 function render(){A.querySelectorAll(".obstacle,.point,.measure,.distance-line").forEach(e=>e.remove());let w=fit();S.style.width=A.style.width=w+"px";S.style.height=A.style.height=w*H/W+"px";$("widthLabel").textContent=W+" m";$("lengthLabel").textContent=H+" m";$("zoomText").textContent=Math.round(z*100)+"%";let n=0;
- O.forEach((o,i)=>{let e=document.createElement("div");e.className="obstacle "+o.type;e.style.setProperty("--a",(o.angle||0)+"deg");if(o.type!=="cone")e.style.width=3/W*100+"%";let h="";if(o.type!=="cone"){n++;if(nums)h=`<span class=num>${n}</span>`}if(["rail","oxer"].includes(o.type))h+=`<span class=height-label>${o.height} cm</span>`;e.innerHTML=h;pos(e,o);A.append(e);drag(e,o,{kind:"obstacle",index:i})});
+ O.forEach((o,i)=>{let e=document.createElement("div");e.className="obstacle "+o.type;e.style.setProperty("--a",(o.angle||0)+"deg");if(o.type!=="cone")e.style.width=3/W*100+"%";if(o.type==="oxer")e.style.setProperty("--oxer-px",Math.max(16,oxerSpread(o)/H*A.clientHeight)+"px");let h="";if(o.type!=="cone"){n++;if(nums)h=`<span class=num>${n}</span>`}if(["rail","oxer"].includes(o.type))h+=`<span class=height-label>${o.height} cm</span>`;e.innerHTML=h;pos(e,o);A.append(e);drag(e,o,{kind:"obstacle",index:i})});
  [["start","START",start],["finish","MÅL",finish]].forEach(v=>{let e=document.createElement("div");e.className="point "+v[0];e.textContent=v[1];pos(e,v[2]);A.append(e);drag(e,v[2],{kind:v[0]})});route();updateSelection()}
-function add(t){let o={x:W/2,y:H/2,type:t,angle:0,edge:false};if(["rail","oxer"].includes(t))o.height=80;if(t==="oxer")o.oxerWidth=.9;O.push(o);sel={kind:"obstacle",index:O.length-1};render()}
+function add(t){let o={x:W/2,y:H/2,type:t,angle:0,edge:false};if(["rail","oxer"].includes(t))o.height=80;if(t==="oxer")o.oxerWidth=null;O.push(o);sel={kind:"obstacle",index:O.length-1};render()}
 for(let h=30;h<=150;h+=10)$("heightSelect").insertAdjacentHTML("beforeend",`<option value="${h}">${h} cm</option>`);
 document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>add(b.dataset.add));
 $("heightSelect").onchange=e=>{let o=O[sel.index];if(o){o.height=+e.target.value;render()}};
-$("oxerWidthSelect").onchange=e=>{let o=O[sel.index];if(o)o.oxerWidth=+e.target.value};
+$("oxerWidthSelect").onchange=e=>{let o=O[sel.index];if(o?.type==="oxer"){o.oxerWidth=e.target.value==="auto"?null:+e.target.value;render()}};
 $("zoomIn").onclick=()=>{z=clamp(z+.10,.55,2.5);render()};$("zoomOut").onclick=()=>{z=clamp(z-.10,.55,2.5);render()};
 $("rotate").onclick=()=>{rot=!rot;draw=false;updateSelection()};
 $("duplicate").onclick=()=>{if(sel.kind==="obstacle"){let i=sel.index,o={...O[i],x:clamp(O[i].x+2,0,W),y:clamp(O[i].y+2,0,H),edge:false};O.splice(i+1,0,o);sel.index=i+1;render()}};
@@ -41,8 +41,10 @@ $("toggleNumbers").onclick=()=>{nums=!nums;$("toggleNumbers").classList.toggle("
 $("toggleRoute").onclick=()=>{showRoute=!showRoute;$("toggleRoute").classList.toggle("active",showRoute);$("toggleRoute").querySelector(".toggleDot").textContent=showRoute?"●":"○";route()};
 $("drawRoute").onclick=()=>{draw=!draw;rot=false;showRoute=true;$("drawRoute").classList.toggle("active",draw);$("rotate").classList.remove("active");$("toggleRoute").classList.toggle("active",showRoute)};
 $("clearRoute").onclick=()=>{if(!path.length)return;if(confirm("Vill du rensa hela ridvägen?")){path=[];route()}};
-$("arenaSize").value="20,60";$("arenaSize").onchange=e=>{[W,H]=e.target.value.split(",").map(Number);O.forEach(o=>{o.x=clamp(o.x,0,W);o.y=clamp(o.y,0,H)});start.x=clamp(start.x,0,W);start.y=clamp(start.y,0,H);finish.x=clamp(finish.x,0,W);finish.y=clamp(finish.y,0,H);render()};
-$("selectedType").onchange=e=>{let o=sel.kind==="obstacle"?O[sel.index]:null;if(!o)return;o.type=e.target.value;if(["rail","oxer"].includes(o.type)&&!o.height)o.height=80;if(o.type==="oxer"&&!o.oxerWidth)o.oxerWidth=.9;render()};
+$("arenaSize").value="20,60";$("arenaSize").onchange=e=>{if(e.target.value==="custom"){$("customArena").style.display="flex";return}$("customArena").style.display="none";[W,H]=e.target.value.split("x").map(Number);render()};
+$("applyCustomArena").onclick=()=>{W=+$("customW").value;H=+$("customH").value;render()};
+
+$("selectedType").onchange=e=>{let o=sel.kind==="obstacle"?O[sel.index]:null;if(!o)return;o.type=e.target.value;if(["rail","oxer"].includes(o.type)&&!o.height)o.height=80;if(o.type==="oxer"&&o.oxerWidth===undefined)o.oxerWidth=null;render()};
 function showTab(which){let arena=which==="arena";$("tabArena").classList.toggle("active",arena);$("tabObstacles").classList.toggle("active",!arena);$("arenaPanel").hidden=!arena;$("obstaclePanel").hidden=arena}
 $("tabArena").onclick=()=>showTab("arena");$("tabObstacles").onclick=()=>showTab("obstacles");
 $("arenaSizePanel").value="20,60";$("arenaSizePanel").onchange=e=>{$("arenaSize").value=e.target.value;$("arenaSize").dispatchEvent(new Event("change"));};
@@ -146,7 +148,7 @@ async function arenaImage(){
       segmentedPole(0,"#1680c5",15);
     }else if(o.type==="oxer"){
       x.fillStyle="#8b8f89";x.fillRect(-len/2-11,-31,10,62);x.fillRect(len/2+1,-31,10,62);
-      segmentedPole(-15,"#c83b34",10);segmentedPole(0,"#c83b34",10);segmentedPole(15,"#c83b34",10);
+      const gap=Math.max(18,oxerSpread(o)*scale);segmentedPole(-gap/2,"#c83b34",11);segmentedPole(gap/2,"#c83b34",11);
     }else if(o.type==="groundpole"){
       segmentedPole(0,"#17624b",12);
     }else if(o.type==="cone"){
