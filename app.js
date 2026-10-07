@@ -4,7 +4,14 @@ let W=20,H=60,z=1,rot=false,hide=false,nums=true,showRoute=true,draw=false,showD
 let path=[],multiSel=new Set(),start={x:2,y:56},finish={x:18,y:4};
 let O=[{x:6,y:48,type:"rail",angle:0,height:80},{x:7,y:36,type:"oxer",angle:0,height:100},{x:14,y:25,type:"oxer",angle:15,height:90},{x:15,y:13,type:"groundpole",angle:0},{x:10,y:7,type:"cone",angle:0}].map(o=>({...o,edge:false}));
 let sel={kind:"obstacle",index:0};
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),oxerSpread=o=>o?.type==="oxer"?(o.oxerWidth==null?(Number(o.height)||80)/100:Number(o.oxerWidth)):0,dist=(a,b)=>{let dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,da=oxerSpread(a)/2;return Math.max(0,Math.hypot(b.x-(a.x+ux*da),b.y-(a.y+uy*da)))},nm=t=>t==="rail"?"Räcke":t==="oxer"?"Oxer":t==="groundpole"?"Markbom":"Kon";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),oxerSpread=o=>o?.type==="oxer"?(o.oxerWidth==null?(Number(o.height)||80)/100:Number(o.oxerWidth)):0,dist=(a,b)=>{
+  let dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L;
+  // An oxer's stored position is its FRONT edge.
+  // Incoming measurement therefore ends at a.x/a.y unchanged.
+  // Outgoing measurement starts at the BACK edge: full oxer spread from the front.
+  let outgoingFromBack=oxerSpread(a);
+  return Math.max(0,Math.hypot(b.x-(a.x+ux*outgoingFromBack),b.y-(a.y+uy*outgoingFromBack)))
+},nm=t=>t==="rail"?"Räcke":t==="oxer"?"Oxer":t==="groundpole"?"Markbom":"Kon";
 function fit(){let r=VP.getBoundingClientRect(),pad=34,aw=Math.max(260,r.width-pad*2),ah=Math.max(360,r.height-pad*2),w=Math.min(aw,ah*W/H)*z;return Math.max(220,w)}
 function point(e){let r=A.getBoundingClientRect();return{x:clamp((e.clientX-r.left)/r.width*W,0,W),y:clamp((e.clientY-r.top)/r.height*H,0,H)}}
 function pos(e,o){e.style.left=o.x/W*100+"%";e.style.top=o.y/H*100+"%"}
