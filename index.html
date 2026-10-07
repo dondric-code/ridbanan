@@ -1,0 +1,70 @@
+<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>Ridbanan</title><link rel="stylesheet" href="style.css?v=hybrid22"><style>body.hide-heights .height-label{display:none!important}</style></head><body>
+<div class="paneltoggles">
+  <button id="toggleTopPanel" title="Visa/dölj verktygsfält">☰</button>
+  <button id="toggleSidePanel" title="Visa/dölj sidopanel">☷</button>
+</div>
+<header class="appbar">
+  <div class="brand">Ridbanan</div>
+  <div class="tools">
+    <button class="tool muted">↶<small>Ångra</small></button><button class="tool muted">↷<small>Gör om</small></button>
+    <button class="tool active">➤<small>Flytta</small></button><button class="tool" id="rotate">↻<small>Rotera</small></button>
+    <button class="tool" id="duplicate">▣<small>Kopiera</small></button><button class="tool danger" id="remove">♜<small>Ta bort</small></button>
+  </div>
+  <div class="viewtools">
+    <button id="drawRoute">⌁ Ridväg</button><button id="hideMeasures">◉ Mått</button>
+  </div>
+  <div class="filetools"><button id="saveArena">▣ Spara</button><button id="newArena">□ Ny bana</button></div>
+</header>
+
+<main class="workspace">
+  <section id="viewport">
+    <div id="stage"><div id="arena">
+      <div class="sand"></div><div class="grid"></div><div class="fence"></div>
+      <svg id="route" viewBox="0 0 1000 2000" preserveAspectRatio="none"></svg>
+      <i id="widthLabel"></i><i id="lengthLabel"></i>
+    </div></div>
+  </section>
+
+  <aside>
+    <div class="tabs"><button id="tabObstacles" class="active">Hinder</button><button id="tabArena">Bana</button></div>
+<div id="arenaPanel" class="arena-panel" hidden>
+  <label>Banmått<select id="arenaSizePanel"><option value="20,60">20 × 60 m</option><option value="20,40">20 × 40 m</option><option value="30,50">30 × 50 m</option></select></label>
+  <p>20 × 60 m är standard.</p>
+</div>
+<div id="obstaclePanel">
+    <div class="addgrid">
+      <button class="add" data-add="rail"><span class="jumpicon railicon"><i></i><i></i><i></i></span><b>Räcke</b><small>3,0 m</small></button>
+      <button class="add" data-add="oxer"><span class="jumpicon oxericon"><i></i><i></i><i></i></span><b>Oxer</b><small>3,0 m</small></button>
+      <button class="add" data-add="groundpole"><span class="poleicon"></span><b>Markbom</b><small>3,0 m</small></button>
+      <button class="add" data-add="cone"><span class="coneicon">▲</span><b>Kon</b></button>
+    </div>
+
+    </div><h5>HINDERINSTÄLLNINGAR</h5>
+    <div class="settings card">
+      <label class="row">Valt
+<select id="selectedType"><option value="rail">Räcke</option><option value="oxer">Oxer</option><option value="groundpole">Markbom</option><option value="cone">Kon</option></select>
+</label>
+      <label id="heightField">Höjd<select id="heightSelect"></select></label>
+      <label id="oxerWidthField">Oxerbredd<select id="oxerWidthSelect"><option value="auto">Följer höjd</option><option value=".5">50 cm</option><option value=".6">60 cm</option><option value=".7">70 cm</option><option value=".8">80 cm</option><option value=".9">90 cm</option><option value="1">100 cm</option><option value="1.1">110 cm</option><option value="1.2">120 cm</option><option value="1.3">130 cm</option><option value="1.4">140 cm</option><option value="1.5">150 cm</option></select></label>
+    </div>
+
+    <h5>VISA</h5>
+    <button class="switchrow" id="toggleDistanceLines">Avståndslinje <span class="toggleDot">●</span></button>
+    <button class="switchrow" id="multiSelect">Markera flera objekt <span class="toggleDot">○</span></button><button class="switchrow" id="edgeMeasures">Kantmått <span class="toggleDot">○</span></button>
+    <button class="switchrow" id="toggleHeights">Hinderhöjd <span class="toggleDot">●</span></button><button class="switchrow" id="toggleNumbers">Hindernummer <span class="toggleDot">●</span></button>
+    <button class="switchrow" id="toggleRoute">Ridväg med pilar <span class="toggleDot">●</span></button>
+    <button class="switchrow" id="clearRoute">Rensa ridväg</button>
+    <div class="bottomcontrols"><select id="arenaSize"><option value="20,60" selected>20 × 60 m</option><option value="20,40">20 × 40 m</option><option value="30,50">30 × 50 m</option><option value="custom">Anpassat mått…</option></select><div id="customArena" style="display:none;gap:6px;align-items:center;margin-top:6px"><select id="customW"><option>10</option><option selected>20</option><option>30</option><option>40</option><option>50</option><option>60</option><option>70</option><option>80</option><option>90</option><option>100</option></select><span>×</span><select id="customH"><option>10</option><option>20</option><option>30</option><option>40</option><option>50</option><option selected>60</option><option>70</option><option>80</option><option>90</option><option>100</option></select><span>m</span><button id="applyCustomArena" type="button">Använd</button></div><button id="zoomOut">−</button><span id="zoomText">100%</span><button id="zoomIn">+</button></div>
+  </aside>
+</main>
+<div id="saveMenu" class="save-menu" hidden>
+  <div class="save-card">
+    <h3>Spara bana</h3>
+    <p>Välj format</p>
+    <button id="savePng">Spara som PNG</button>
+    <button id="savePdf">Spara som PDF</button>
+    <button id="saveCancel" class="secondary">Avbryt</button>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="app.js?v=hybrid22"></script></body></html>
