@@ -415,3 +415,17 @@ body.gesturing #viewport{
   font-size:15px!important;display:flex!important;align-items:center!important;justify-content:center!important;
   pointer-events:auto!important;touch-action:none!important;
 }
+
+/* v27 – slightly smaller obstacle number */
+.obstacle .num{
+  width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;
+  font-size:13px!important;line-height:26px!important;
+}
+
+.obstacle.oxer{
+  min-height:0!important;
+  height:var(--oxer-px)!important;
+}
+
+.obstacle.oxer:before{top:-3.5px!important}
+.obstacle.oxer:after{bottom:-3.5px!important}
