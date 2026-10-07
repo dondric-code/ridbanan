@@ -1,4 +1,8 @@
-<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>Ridbanan</title><link rel="stylesheet" href="style.css?v=hybrid14"></head><body>
+<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>Ridbanan</title><link rel="stylesheet" href="style.css?v=hybrid16"></head><body>
+<div class="paneltoggles">
+  <button id="toggleTopPanel" title="Visa/dölj verktygsfält">☰</button>
+  <button id="toggleSidePanel" title="Visa/dölj sidopanel">☷</button>
+</div>
 <header class="appbar">
   <div class="brand">Ridbanan</div>
   <div class="tools">
@@ -53,4 +57,15 @@
     <div class="bottomcontrols"><select id="arenaSize"><option value="20,60" selected>20 × 60 m</option><option value="20,40">20 × 40 m</option><option value="30,50">30 × 50 m</option></select><button id="zoomOut">−</button><span id="zoomText">100%</span><button id="zoomIn">+</button></div>
   </aside>
 </main>
-<script src="app.js?v=hybrid14"></script></body></html>
+<div id="saveMenu" class="save-menu" hidden>
+  <div class="save-card">
+    <h3>Spara bana</h3>
+    <p>Välj format</p>
+    <button id="savePng">Spara som PNG</button>
+    <button id="savePdf">Spara som PDF</button>
+    <button id="saveCancel" class="secondary">Avbryt</button>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="app.js?v=hybrid16"></script></body></html>

@@ -29,7 +29,7 @@ for(let h=30;h<=150;h+=10)$("heightSelect").insertAdjacentHTML("beforeend",`<opt
 document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>add(b.dataset.add));
 $("heightSelect").onchange=e=>{let o=O[sel.index];if(o){o.height=+e.target.value;render()}};
 $("oxerWidthSelect").onchange=e=>{let o=O[sel.index];if(o)o.oxerWidth=+e.target.value};
-$("zoomIn").onclick=()=>{z=clamp(z+.15,.55,2.2);render()};$("zoomOut").onclick=()=>{z=clamp(z-.15,.55,2.2);render()};
+$("zoomIn").onclick=()=>{z=clamp(z+.10,.55,2.5);render()};$("zoomOut").onclick=()=>{z=clamp(z-.10,.55,2.5);render()};
 $("rotate").onclick=()=>{rot=!rot;draw=false;updateSelection()};
 $("duplicate").onclick=()=>{if(sel.kind==="obstacle"){let i=sel.index,o={...O[i],x:clamp(O[i].x+2,0,W),y:clamp(O[i].y+2,0,H),edge:false};O.splice(i+1,0,o);sel.index=i+1;render()}};
 $("remove").onclick=()=>{if(sel.kind==="obstacle"){O.splice(sel.index,1);multiSel.clear();sel=O.length?{kind:"obstacle",index:Math.min(sel.index,O.length-1)}:{kind:"start"};render()}};
@@ -46,10 +46,76 @@ $("selectedType").onchange=e=>{let o=sel.kind==="obstacle"?O[sel.index]:null;if(
 function showTab(which){let arena=which==="arena";$("tabArena").classList.toggle("active",arena);$("tabObstacles").classList.toggle("active",!arena);$("arenaPanel").hidden=!arena;$("obstaclePanel").hidden=arena}
 $("tabArena").onclick=()=>showTab("arena");$("tabObstacles").onclick=()=>showTab("obstacles");
 $("arenaSizePanel").value="20,60";$("arenaSizePanel").onchange=e=>{$("arenaSize").value=e.target.value;$("arenaSize").dispatchEvent(new Event("change"));};
-$("saveArena").onclick=()=>{let data={version:1,W,H,O,start,finish,path};localStorage.setItem("ridbanan-save",JSON.stringify(data));let b=$("saveArena"),old=b.textContent;b.textContent="✓ Sparad";setTimeout(()=>b.textContent=old,1200)};
+$("saveArena").onclick=()=>{
+  let data={version:1,W,H,O,start,finish,path};
+  localStorage.setItem("ridbanan-save",JSON.stringify(data));
+  $("saveMenu").hidden=false;
+};
+$("saveCancel").onclick=()=>$("saveMenu").hidden=true;
+$("saveMenu").onclick=e=>{if(e.target===$("saveMenu"))$("saveMenu").hidden=true};
+
+async function arenaImage(){
+  if(typeof html2canvas!=="function")throw new Error("Exportbiblioteket kunde inte laddas");
+  let wasSel=sel, hadMulti=new Set(multiSel);
+  A.classList.add("exporting");
+  A.querySelectorAll(".selected,.multi-selected").forEach(e=>e.classList.remove("selected","multi-selected"));
+  let canvas=await html2canvas(A,{backgroundColor:null,scale:2,useCORS:true,logging:false});
+  A.classList.remove("exporting"); sel=wasSel; multiSel=hadMulti; updateSelection();
+  return canvas;
+}
+$("savePng").onclick=async()=>{
+  try{
+    let c=await arenaImage(),a=document.createElement("a");
+    a.download="ridbanan.png";a.href=c.toDataURL("image/png");a.click();$("saveMenu").hidden=true;
+  }catch(e){alert("Kunde inte skapa PNG. Kontrollera internetanslutningen och försök igen.")}
+};
+$("savePdf").onclick=async()=>{
+  try{
+    let c=await arenaImage();
+    if(!window.jspdf?.jsPDF)throw new Error("PDF-bibliotek saknas");
+    let portrait=c.height>=c.width,{jsPDF}=window.jspdf;
+    let pdf=new jsPDF({orientation:portrait?"portrait":"landscape",unit:"mm",format:"a4"});
+    let pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=8;
+    let r=Math.min((pw-2*m)/c.width,(ph-2*m)/c.height),w=c.width*r,h=c.height*r;
+    pdf.addImage(c.toDataURL("image/jpeg",.94),"JPEG",(pw-w)/2,(ph-h)/2,w,h);
+    pdf.save("ridbanan.pdf");$("saveMenu").hidden=true;
+  }catch(e){alert("Kunde inte skapa PDF. Kontrollera internetanslutningen och försök igen.")}
+};
 $("newArena").onclick=()=>{if(!confirm("Skapa en ny bana? Den nuvarande banan rensas."))return;W=20;H=60;z=1;O=[];path=[];start={x:2,y:56};finish={x:18,y:4};sel={kind:"start"};multiSel.clear();$("arenaSize").value="20,60";$("arenaSizePanel").value="20,60";render()};
 
 let drawing=false,did;A.addEventListener("pointerdown",e=>{if(!draw||e.target.closest(".obstacle,.point"))return;e.preventDefault();drawing=true;did=e.pointerId;path=[point(e)];try{A.setPointerCapture(did)}catch(_){}route()});A.addEventListener("pointermove",e=>{if(!drawing||e.pointerId!==did)return;let p=point(e),l=path.at(-1);if(dist(l,p)>.2){path.push(p);route()}});A.addEventListener("pointerup",()=>drawing=false);A.addEventListener("pointercancel",()=>drawing=false);
+
+// Panel controls
+$("toggleSidePanel").onclick=()=>{document.body.classList.toggle("side-hidden");setTimeout(render,220)};
+$("toggleTopPanel").onclick=()=>{document.body.classList.toggle("top-hidden");setTimeout(render,220)};
+if(matchMedia("(max-width:700px)").matches)document.body.classList.add("side-hidden");
+
+// Two-finger pan + pinch zoom on the arena viewport.
+// One finger remains reserved for moving/rotating obstacles and drawing the riding line.
+let gesture=null;
+const td=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+VP.addEventListener("touchstart",e=>{
+  if(e.touches.length===2){
+    e.preventDefault();document.body.classList.add("gesturing");
+    let a=e.touches[0],b=e.touches[1];
+    gesture={d:td(a,b),z,scrollLeft:VP.scrollLeft,scrollTop:VP.scrollTop,
+      cx:(a.clientX+b.clientX)/2,cy:(a.clientY+b.clientY)/2};
+  }
+},{passive:false});
+VP.addEventListener("touchmove",e=>{
+  if(!gesture||e.touches.length!==2)return;
+  e.preventDefault();
+  let a=e.touches[0],b=e.touches[1],cx=(a.clientX+b.clientX)/2,cy=(a.clientY+b.clientY)/2;
+  let nz=clamp(gesture.z*td(a,b)/gesture.d,.55,2.5);
+  if(Math.abs(nz-z)>.025){z=nz;render()}
+  VP.scrollLeft=gesture.scrollLeft-(cx-gesture.cx);
+  VP.scrollTop=gesture.scrollTop-(cy-gesture.cy);
+},{passive:false});
+VP.addEventListener("touchend",e=>{
+  if(e.touches.length<2){gesture=null;document.body.classList.remove("gesturing")}
+},{passive:false});
+VP.addEventListener("touchcancel",()=>{gesture=null;document.body.classList.remove("gesturing")},{passive:false});
+
 let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(render,100)});
 try{let sv=JSON.parse(localStorage.getItem("ridbanan-save")||"null");if(sv&&sv.version===1){W=sv.W||20;H=sv.H||60;O=Array.isArray(sv.O)?sv.O:O;start=sv.start||start;finish=sv.finish||finish;path=sv.path||[];$("arenaSize").value=W+","+H;$("arenaSizePanel").value=W+","+H}}catch(_){}
 $("hideMeasures").classList.toggle("active",!hide);
