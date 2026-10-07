@@ -55,14 +55,132 @@ $("saveCancel").onclick=()=>$("saveMenu").hidden=true;
 $("saveMenu").onclick=e=>{if(e.target===$("saveMenu"))$("saveMenu").hidden=true};
 
 async function arenaImage(){
-  if(typeof html2canvas!=="function")throw new Error("Exportbiblioteket kunde inte laddas");
-  let wasSel=sel, hadMulti=new Set(multiSel);
-  A.classList.add("exporting");
-  A.querySelectorAll(".selected,.multi-selected").forEach(e=>e.classList.remove("selected","multi-selected"));
-  let canvas=await html2canvas(A,{backgroundColor:null,scale:2,useCORS:true,logging:false});
-  A.classList.remove("exporting"); sel=wasSel; multiSel=hadMulti; updateSelection();
-  return canvas;
+  // Dedicated export renderer. It draws from arena data rather than screenshotting DOM/CSS.
+  const scale=52, pad=52, aw=W*scale, ah=H*scale;
+  const c=document.createElement("canvas");
+  c.width=Math.round(aw+pad*2); c.height=Math.round(ah+pad*2);
+  const x=c.getContext("2d");
+  x.imageSmoothingEnabled=true;
+
+  const X=v=>pad+v*scale, Y=v=>pad+v*scale;
+  const roundRect=(cx,cy,w,h,r,fill,stroke=null,lw=1)=>{
+    x.beginPath();x.roundRect(cx-w/2,cy-h/2,w,h,r);
+    if(fill){x.fillStyle=fill;x.fill()}
+    if(stroke){x.strokeStyle=stroke;x.lineWidth=lw;x.stroke()}
+  };
+  const textBox=(txt,cx,cy,opts={})=>{
+    const fs=opts.fs||22, py=opts.py||9, px=opts.px||13;
+    x.save();x.font=`${opts.bold===false?500:700} ${fs}px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif`;
+    x.textAlign="center";x.textBaseline="middle";
+    const tw=x.measureText(txt).width,w=tw+px*2,h=fs+py*2;
+    roundRect(cx,cy,w,h,opts.r||8,opts.bg||"#fff",opts.border||"#d7d7d7",opts.lw||1.5);
+    x.fillStyle=opts.color||"#202426";x.fillText(txt,cx,cy+1);x.restore();
+  };
+  const dashed=(a,b,color="#252525",lw=4)=>{
+    x.save();x.strokeStyle=color;x.lineWidth=lw;x.setLineDash([13,11]);x.lineCap="round";
+    x.beginPath();x.moveTo(X(a.x),Y(a.y));x.lineTo(X(b.x),Y(b.y));x.stroke();x.restore();
+  };
+  const measureLabel=(a,b)=>{
+    if(hide||!a||!b||a.type==="cone"||b.type==="cone")return;
+    textBox(dist(a,b).toFixed(1)+" m",(X(a.x)+X(b.x))/2,(Y(a.y)+Y(b.y))/2,{fs:21});
+  };
+
+  // clean white outside + sand arena
+  x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);
+  x.fillStyle="#e2c99f";x.fillRect(pad,pad,aw,ah);
+  // subtle sand grain, deterministic pattern
+  x.save();x.globalAlpha=.12;x.fillStyle="#9b7548";
+  for(let gy=pad+9;gy<pad+ah;gy+=19)for(let gx=pad+7;gx<pad+aw;gx+=23){
+    const off=((Math.floor(gy/19)*17+Math.floor(gx/23)*11)%9)-4;
+    x.fillRect(gx+off,gy,1.5,1.5);
+  }x.restore();
+
+  // timber fence: two rails + posts
+  x.save();
+  x.strokeStyle="#79502d";x.lineWidth=12;x.strokeRect(pad-7,pad-7,aw+14,ah+14);
+  x.strokeStyle="#b17b45";x.lineWidth=5;x.strokeRect(pad-7,pad-7,aw+14,ah+14);
+  const post=18, step=scale*3;
+  x.fillStyle="#744724";
+  for(let xx=pad;xx<=pad+aw+.1;xx+=step){x.fillRect(xx-post/2,pad-18,post,27);x.fillRect(xx-post/2,pad+ah-9,post,27)}
+  for(let yy=pad;yy<=pad+ah+.1;yy+=step){x.fillRect(pad-18,yy-post/2,27,post);x.fillRect(pad+aw-9,yy-post/2,27,post)}
+  x.restore();
+
+  // arena dimension labels
+  textBox(W+" m",pad+aw/2,pad-19,{fs:20});
+  textBox(H+" m",pad-19,pad+ah/2,{fs:20});
+
+  // riding path
+  if(showRoute&&path.length>1){
+    x.save();x.strokeStyle="#16704f";x.lineWidth=5;x.setLineDash([13,10]);x.lineCap="round";x.lineJoin="round";
+    x.beginPath();x.moveTo(X(path[0].x),Y(path[0].y));for(let i=1;i<path.length;i++)x.lineTo(X(path[i].x),Y(path[i].y));x.stroke();
+    x.setLineDash([]);x.strokeStyle="#16704f";x.lineWidth=5;
+    for(let i=8;i<path.length;i+=12){
+      const a=path[i-1],b=path[i],ang=Math.atan2(b.y-a.y,b.x-a.x),cx=X(b.x),cy=Y(b.y);
+      x.save();x.translate(cx,cy);x.rotate(ang);x.beginPath();x.moveTo(-13,-9);x.lineTo(0,0);x.lineTo(-13,9);x.stroke();x.restore();
+    }x.restore();
+  }
+
+  // distance chain, excluding cones
+  const chain=O.filter(o=>o.type!=="cone");
+  if(chain.length){
+    const pairs=[[start,chain[0]]];
+    for(let i=0;i<chain.length-1;i++)pairs.push([chain[i],chain[i+1]]);
+    pairs.push([chain.at(-1),finish]);
+    for(const [a,b] of pairs){if(showDistanceLines)dashed(a,b);measureLabel(a,b)}
+  }
+
+  function drawObstacle(o,num){
+    const cx=X(o.x),cy=Y(o.y),ang=(o.angle||0)*Math.PI/180;
+    x.save();x.translate(cx,cy);x.rotate(ang);
+    const len=3*scale;
+    x.shadowColor="rgba(0,0,0,.28)";x.shadowBlur=7;x.shadowOffsetX=4;x.shadowOffsetY=6;
+
+    const segmentedPole=(yy,color,h=11)=>{
+      const seg=6, sw=len/seg;
+      for(let i=0;i<seg;i++){x.fillStyle=i%2? "#f6f2e8":color;x.fillRect(-len/2+i*sw,yy-h/2,sw+.7,h)}
+      x.strokeStyle="#59615b";x.lineWidth=2;x.strokeRect(-len/2,yy-h/2,len,h);
+    };
+
+    if(o.type==="rail"){
+      x.fillStyle="#8b8f89";x.fillRect(-len/2-11,-25,10,50);x.fillRect(len/2+1,-25,10,50);
+      segmentedPole(0,"#1680c5",15);
+    }else if(o.type==="oxer"){
+      x.fillStyle="#8b8f89";x.fillRect(-len/2-11,-31,10,62);x.fillRect(len/2+1,-31,10,62);
+      segmentedPole(-15,"#c83b34",10);segmentedPole(0,"#c83b34",10);segmentedPole(15,"#c83b34",10);
+    }else if(o.type==="groundpole"){
+      segmentedPole(0,"#17624b",12);
+    }else if(o.type==="cone"){
+      x.shadowColor="rgba(0,0,0,.25)";
+      x.fillStyle="#ef7620";x.beginPath();x.moveTo(0,-28);x.lineTo(19,19);x.lineTo(-19,19);x.closePath();x.fill();
+      x.fillStyle="#f6f1e8";x.fillRect(-13,-2,26,8);
+      x.fillStyle="#df651a";roundRect(0,22,48,10,2,"#df651a");
+    }
+    x.restore();
+
+    if(o.type!=="cone"&&nums&&num!=null)textBox(String(num),cx,cy-43,{fs:18,r:18,px:9,py:7});
+    if((o.type==="rail"||o.type==="oxer")&&o.height)textBox(o.height+" cm",cx,cy+43,{fs:18,bold:false});
+  }
+
+  let no=0;
+  for(const o of O){drawObstacle(o,o.type==="cone"?null:++no)}
+
+  // edge measurements only for objects where enabled
+  const chosen=multiMode&&multiSel.size?[...multiSel].map(i=>O[i]).filter(Boolean):(sel.kind==="obstacle"?[O[sel.index]]:[]);
+  for(const o of chosen.filter(q=>q&&q.edge)){
+    const labs=[
+      [o.x/2,o.y,o.x],[(o.x+W)/2,o.y,W-o.x],
+      [o.x,o.y/2,o.y],[o.x,(o.y+H)/2,H-o.y]
+    ];
+    for(const q of labs)textBox(q[2].toFixed(1)+" m",X(q[0]),Y(q[1]),{fs:18,bg:"#eaf5ff"});
+  }
+
+  // Start / finish on top
+  textBox("START",X(start.x),Y(start.y),{fs:19,bg:"#168453",color:"#fff",border:"#168453",px:14,py:9});
+  textBox("MÅL",X(finish.x),Y(finish.y),{fs:19,bg:"#c94a3c",color:"#fff",border:"#c94a3c",px:14,py:9});
+
+  return c;
 }
+
 $("savePng").onclick=async()=>{
   try{
     const c=await arenaImage();
@@ -95,7 +213,7 @@ $("savePdf").onclick=async()=>{
     let pdf=new jsPDF({orientation:portrait?"portrait":"landscape",unit:"mm",format:"a4"});
     let pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=8;
     let r=Math.min((pw-2*m)/c.width,(ph-2*m)/c.height),w=c.width*r,h=c.height*r;
-    pdf.addImage(c.toDataURL("image/jpeg",.94),"JPEG",(pw-w)/2,(ph-h)/2,w,h);
+    pdf.addImage(c.toDataURL("image/png"),"PNG",(pw-w)/2,(ph-h)/2,w,h);
     pdf.save("ridbanan.pdf");$("saveMenu").hidden=true;
   }catch(e){alert("Kunde inte skapa PDF. Kontrollera internetanslutningen och försök igen.")}
 };
